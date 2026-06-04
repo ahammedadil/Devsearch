@@ -1,393 +1,354 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, Briefcase, GraduationCap, CheckSquare, Edit3, Save, 
-  ArrowRight, Award, Compass, Heart, Bookmark, Sparkles, BookOpen 
+import {
+  Map, Lightbulb, GraduationCap, CheckSquare,
+  Flame, ArrowRight, Zap, Trophy, Compass
 } from 'lucide-react';
-import { jobsData, resourcesData, defaultSkills } from '../data/mockData';
+import { roadmapsData, projectsData, resourcesData, defaultSkills } from '../data/mockData';
 
-export default function Dashboard({ savedJobs, completedResources, skills, profile, setProfile }) {
-  const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempProfile, setTempProfile] = useState({ ...profile });
+const tips = [
+  "Build projects you're actually curious about — curiosity beats discipline.",
+  "Code every day, even if it's just 20 minutes. Consistency wins.",
+  "Read other people's code on GitHub — it's the fastest way to learn real patterns.",
+  "Document as you build. Future-you will thank present-you.",
+  "Push to GitHub daily. Your commit graph is your silent resume.",
+  "Teach what you learn. Writing a blog post solidifies knowledge.",
+  "Don't tutorial-hop. Pick one resource and see it through to the end.",
+  "Learn to read error messages carefully — they usually tell you the exact problem.",
+  "Write clean code, but don't optimize prematurely. Working code is better than perfect non-existent code.",
+  "ಬೆಂಗಳೂರು (Bangalore) is a major tech hub — look for local developer meetups to build your network!",
+  "Master Git early. Knowing how to branch, merge, and rebase will save you hours of panic.",
+  "Invest time in learning keyboard shortcuts for your IDE. Tiny improvements compound over time.",
+  "When stuck, step away from the screen. A 10-minute walk solves more bugs than staring in frustration.",
+  "Break large problems into tiny, verifiable steps. Solve them one by one.",
+  "Before writing code, explain your solution out loud or draw it on a whiteboard.",
+  "Don't memorize syntax. Understand concepts and search structures efficiently.",
+  "Practice writing good, descriptive commit messages. Collaboration becomes ten times easier.",
+  "Always write code as if the person maintaining it is a violent psychopath who knows where you live.",
+  "Learn how the browser rendering engine works under the hood. It changes how you write frontend components.",
+  "Optimize for readability first. Code is read far more often than it is written.",
+  "Write unit tests for complex business logic. It builds confidence when refactoring.",
+  "Understand relational database indexing. Bad query speeds are almost always index issues.",
+  "Embrace constructive reviews. Code reviews are meant to refine the codebase, not criticize the coder.",
+  "Keep your functions short, cohesive, and focused on doing one single thing well.",
+  "Don't neglect CSS fundamentals. Tailwind is great, but raw layouts knowledge makes you irreplaceable.",
+  "Understand CORS early on — it will save you countless network debug headaches later.",
+  "Avoid global states whenever local variables or component props suffice.",
+  "Always keep secrets, API tokens, and passwords out of your Git source history.",
+  "Deploy your code to production early. Staging setups expose environment mismatches immediately.",
+  "Measure your performance curve, not how fast others seem to code. Everyone grows differently.",
+  "Stay curious! The best developers are lifelong students who enjoy the process of discovering new paradigms."
+];
 
-  // Calculate stats
-  const savedJobsCount = savedJobs.length;
-  const completedResCount = completedResources.length;
-  const totalResources = resourcesData.length;
-  const resourcesPercentage = totalResources > 0 ? Math.round((completedResCount / totalResources) * 100) : 0;
-
-  // Calculate total skills and completed skills
-  const totalSkills = defaultSkills.reduce((acc, cat) => acc + cat.items.length, 0);
-  const completedSkillsCount = Object.values(skills).filter(Boolean).length;
-  const skillsPercentage = totalSkills > 0 ? Math.round((completedSkillsCount / totalSkills) * 100) : 0;
-
-  // Get bookmarked jobs, or suggest some if none saved
-  const hasSavedJobs = savedJobs.length > 0;
-  const bookmarkedJobsList = hasSavedJobs
-    ? jobsData.filter(job => savedJobs.includes(job.id)).slice(0, 3)
-    : jobsData.slice(0, 3);
-
-  // Pick a recommended skill to learn next (first uncompleted skill)
-  let recommendedSkill = null;
-  for (const cat of defaultSkills) {
-    const uncompleted = cat.items.find(item => !skills[item.id]);
-    if (uncompleted) {
-      recommendedSkill = { ...uncompleted, category: cat.title };
-      break;
-    }
+const roleMappings = {
+  'Frontend Developer': {
+    roadmapId: 'frontend',
+    resourceTopics: ['HTML', 'CSS', 'JavaScript', 'React'],
+    projectCategories: ['Frontend'],
+    skillCategory: 'frontend',
+    gradient: 'from-violet-600 via-fuchsia-600 to-indigo-750',
+    shadow: 'shadow-violet-900/30 text-violet-600 dark:text-violet-400',
+    bgLight: 'bg-violet-500/10',
+    badgeColor: 'bg-violet-500/20 text-violet-100 border border-violet-500/30',
+    tagline: 'Crafting responsive, interactive, and beautiful pixel-perfect user experiences.'
+  },
+  'Backend Developer': {
+    roadmapId: 'backend',
+    resourceTopics: ['Backend', 'Tools'],
+    projectCategories: ['Full Stack'],
+    skillCategory: 'backend',
+    gradient: 'from-blue-600 via-indigo-600 to-cyan-705',
+    shadow: 'shadow-blue-900/30 text-blue-600 dark:text-blue-400',
+    bgLight: 'bg-blue-500/10',
+    badgeColor: 'bg-blue-500/20 text-blue-100 border border-blue-500/30',
+    tagline: 'Designing high-performance APIs, robust server architectures, and scalable database schemas.'
+  },
+  'Full Stack Developer': {
+    roadmapId: 'fullstack',
+    resourceTopics: ['JavaScript', 'React', 'Backend'],
+    projectCategories: ['Frontend', 'Full Stack'],
+    skillCategory: 'frontend',
+    gradient: 'from-indigo-600 via-purple-650 to-violet-750',
+    shadow: 'shadow-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+    bgLight: 'bg-indigo-500/10',
+    badgeColor: 'bg-indigo-500/20 text-indigo-100 border border-indigo-500/30',
+    tagline: 'Bridging the gap between beautiful user interfaces and powerful background architectures.'
+  },
+  'Data Scientist': {
+    roadmapId: 'datascience',
+    resourceTopics: ['Tools', 'Backend'],
+    projectCategories: ['AI/ML'],
+    skillCategory: 'tools-devops',
+    gradient: 'from-emerald-600 via-teal-650 to-cyan-705',
+    shadow: 'shadow-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+    bgLight: 'bg-emerald-500/10',
+    badgeColor: 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30',
+    tagline: 'Extracting clean insights, building predictive models, and visualizing complex datasets.'
+  },
+  'DevOps Engineer': {
+    roadmapId: 'devops',
+    resourceTopics: ['Tools', 'Backend'],
+    projectCategories: ['Full Stack'],
+    skillCategory: 'tools-devops',
+    gradient: 'from-orange-600 via-amber-600 to-red-700',
+    shadow: 'shadow-orange-900/30 text-orange-600 dark:text-orange-400',
+    bgLight: 'bg-orange-500/10',
+    badgeColor: 'bg-orange-500/20 text-orange-100 border border-orange-500/30',
+    tagline: 'Automating deployment pipelines, containerizing workloads, and orchestrating cloud environments.'
+  },
+  'UI/UX Designer': {
+    roadmapId: 'uiux',
+    resourceTopics: ['HTML', 'CSS'],
+    projectCategories: ['Frontend'],
+    skillCategory: 'frontend',
+    gradient: 'from-pink-600 via-fuchsia-600 to-rose-700',
+    shadow: 'shadow-pink-900/30 text-pink-600 dark:text-pink-400',
+    bgLight: 'bg-pink-500/10',
+    badgeColor: 'bg-pink-500/20 text-pink-100 border border-pink-500/30',
+    tagline: 'Stitching empathy with visual design and creating intuitive customer journeys and Figma styleguides.'
+  },
+  'Student / Learner': {
+    roadmapId: 'frontend',
+    resourceTopics: ['HTML', 'CSS', 'JavaScript'],
+    projectCategories: ['Frontend'],
+    skillCategory: 'frontend',
+    gradient: 'from-sky-600 via-blue-650 to-indigo-705',
+    shadow: 'shadow-sky-900/30 text-sky-600 dark:text-sky-400',
+    bgLight: 'bg-sky-500/10',
+    badgeColor: 'bg-sky-500/20 text-sky-100 border border-sky-500/30',
+    tagline: 'Laying a solid foundation in computer science, logic design, and core programming paradigms.'
+  },
+  'Just Exploring': {
+    roadmapId: 'fullstack',
+    resourceTopics: ['HTML', 'JavaScript', 'React'],
+    projectCategories: ['Frontend', 'Full Stack'],
+    skillCategory: 'frontend',
+    gradient: 'from-slate-700 via-slate-800 to-slate-950',
+    shadow: 'shadow-slate-900/30 text-slate-600 dark:text-slate-400',
+    bgLight: 'bg-slate-500/10',
+    badgeColor: 'bg-slate-500/20 text-slate-100 border border-slate-500/30',
+    tagline: 'Tasting a bit of everything and understanding what excites you the most in coding.'
   }
+};
 
-  // Handle profile save
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
-    setProfile(tempProfile);
-    setIsEditing(false);
+export default function Dashboard({ completedResources, skills, profile, onResetProfile }) {
+  const navigate = useNavigate();
+  const tip = tips[new Date().getDate() % tips.length];
+
+  const activeMapping = roleMappings[profile?.role] || roleMappings['Just Exploring'];
+
+  // Dynamic calculations based on matching role filters
+  // 1. Roadmap Phases
+  const matchedRoadmap = roadmapsData.find(r => r.id === activeMapping.roadmapId) || roadmapsData[0];
+  const roadmapPhasesCount = matchedRoadmap.steps.length;
+
+  // 2. Resources Count & Done
+  const roleResources = resourcesData.filter(r => activeMapping.resourceTopics.includes(r.topic));
+  const resourcesCompletedCount = roleResources.filter(r => completedResources.includes(r.id)).length;
+
+  // 3. Projects Available
+  const roleProjects = projectsData.filter(p => activeMapping.projectCategories.includes(p.category));
+  const projectsAvailableCount = roleProjects.length;
+
+  // 4. Skills Completed (within their skillCategory)
+  const matchedSkillCat = defaultSkills.find(c => c.id === activeMapping.skillCategory) || defaultSkills[0];
+  const catSkillsCount = matchedSkillCat.items.length;
+  const catSkillsCompletedCount = matchedSkillCat.items.filter(item => skills[item.id]).length;
+
+  // 5. Global Skills (for overall progress ring)
+  const totalGlobalSkills = defaultSkills.reduce((acc, cat) => acc + cat.items.length, 0);
+  const completedGlobalSkills = Object.keys(skills).filter(key => skills[key]).length;
+  const progressPct = totalGlobalSkills > 0 ? Math.round((completedGlobalSkills / totalGlobalSkills) * 100) : 0;
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   };
+
+  const firstName = profile?.name?.split(' ')[0] || 'Developer';
 
   return (
     <div className="py-8 px-4 sm:px-8 lg:px-12 w-full space-y-8 animate-fadeIn">
-      
-      {/* Hero Welcome Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-6 sm:p-10 shadow-xl shadow-indigo-500/20">
-        {/* Background decorative blobs */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 animate-pulse-slow"></div>
-        <div className="absolute -bottom-10 left-1/3 w-60 h-60 bg-indigo-500/30 rounded-full blur-2xl"></div>
 
-        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      {/* ── Personalized Welcome Banner ── */}
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-r ${activeMapping.gradient} p-6 sm:p-8 shadow-xl ${activeMapping.shadow}`}>
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl" />
+        <div className="absolute bottom-0 left-1/4 w-56 h-56 bg-white/5 rounded-full translate-y-1/2 blur-lg" />
+        
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-violet-100 text-xs font-semibold backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5" />
-              Welcome to your Workspace
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-white/10 text-white border border-white/10">
+                Goal Active
+              </span>
+              <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${activeMapping.badgeColor}`}>
+                {profile?.role}
+              </span>
             </div>
-            {isEditing ? (
-              <form onSubmit={handleSaveProfile} className="space-y-4 max-w-md bg-white/10 p-4 rounded-2xl backdrop-blur-md">
-                <div>
-                  <label className="block text-xs font-medium text-violet-100 mb-1">Your Name</label>
-                  <input
-                    type="text"
-                    value={tempProfile.name}
-                    onChange={(e) => setTempProfile({ ...tempProfile, name: e.target.value })}
-                    className="w-full bg-white/20 border border-white/20 rounded-xl px-3 py-2 text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
-                    placeholder="Ahammed Adil"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-violet-100 mb-1">Your Goal / Role</label>
-                  <input
-                    type="text"
-                    value={tempProfile.role}
-                    onChange={(e) => setTempProfile({ ...tempProfile, role: e.target.value })}
-                    className="w-full bg-white/20 border border-white/20 rounded-xl px-3 py-2 text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
-                    placeholder="BCA Student / Aspiring Frontend Developer"
-                    required
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white text-indigo-700 text-xs font-bold hover:bg-violet-50 transition-all cursor-pointer shadow-md"
-                  >
-                    <Save className="h-3.5 w-3.5" />
-                    Save Changes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTempProfile({ ...profile });
-                      setIsEditing(false);
-                    }}
-                    className="px-3.5 py-1.5 rounded-lg bg-transparent text-white border border-white/30 text-xs font-medium hover:bg-white/10 transition-all cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-1">
-                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                  Hello, {profile.name}!
-                </h1>
-                <p className="text-violet-100 text-base sm:text-lg font-medium opacity-90">
-                  {profile.role}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {!isEditing && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white hover:bg-white/25 border border-white/10 font-semibold text-xs tracking-wide uppercase transition-all duration-200 backdrop-blur-sm cursor-pointer shadow-lg"
-            >
-              <Edit3 className="h-4 w-4" />
-              Edit Profile
-            </button>
-          )}
-        </div>
-
-        {/* Action Buttons in Hero */}
-        {!isEditing && (
-          <div className="flex flex-wrap gap-4 mt-8">
-            <button
-              onClick={() => navigate('/jobs')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-indigo-600 font-bold hover:bg-violet-50 transition-all duration-200 cursor-pointer shadow-md text-sm"
-            >
-              Search Jobs
-              <ArrowRight className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => navigate('/resources')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold transition-all duration-200 cursor-pointer text-sm"
-            >
-              Explore Free Courses
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Stats Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Jobs Saved Stat Card */}
-        <div 
-          onClick={() => navigate('/jobs')}
-          className="glass-card rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg dark:hover:shadow-black/20 hover:border-violet-500/30 transition-all duration-300 group cursor-pointer"
-        >
-          <div className="flex justify-between items-start">
-            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500 dark:bg-amber-400/10 dark:text-amber-400">
-              <Briefcase className="h-6 w-6" />
-            </div>
-            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1 group-hover:text-violet-500 transition-colors">
-              Manage Jobs <ArrowRight className="h-3 w-3" />
-            </span>
-          </div>
-          <div className="mt-6">
-            <h3 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">{savedJobsCount}</h3>
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">Jobs Bookmarked</p>
-            <p className="text-xs text-slate-400 mt-2">Saved job postings looking for application</p>
-          </div>
-        </div>
-
-        {/* Resources Stat Card */}
-        <div 
-          onClick={() => navigate('/resources')}
-          className="glass-card rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg dark:hover:shadow-black/20 hover:border-violet-500/30 transition-all duration-300 group cursor-pointer"
-        >
-          <div className="flex justify-between items-start">
-            <div className="p-3 rounded-xl bg-sky-500/10 text-sky-500 dark:bg-sky-400/10 dark:text-sky-400">
-              <GraduationCap className="h-6 w-6" />
-            </div>
-            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1 group-hover:text-violet-500 transition-colors">
-              Study Hub <ArrowRight className="h-3 w-3" />
-            </span>
-          </div>
-          <div className="mt-4">
-            <div className="flex items-baseline justify-between mb-1">
-              <h3 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">
-                {completedResCount}<span className="text-sm font-normal text-slate-400">/{totalResources}</span>
-              </h3>
-              <span className="text-sm font-bold text-sky-500">{resourcesPercentage}%</span>
-            </div>
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Resources Completed</p>
-            {/* Progress bar */}
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full mt-3 overflow-hidden">
-              <div 
-                className="bg-sky-500 h-full rounded-full transition-all duration-500" 
-                style={{ width: `${resourcesPercentage}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Skill checklist Stat Card */}
-        <div 
-          onClick={() => navigate('/progress')}
-          className="glass-card rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg dark:hover:shadow-black/20 hover:border-violet-500/30 transition-all duration-300 group cursor-pointer"
-        >
-          <div className="flex justify-between items-start">
-            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-400/10 dark:text-emerald-400">
-              <CheckSquare className="h-6 w-6" />
-            </div>
-            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1 group-hover:text-violet-500 transition-colors">
-              Checklist <ArrowRight className="h-3 w-3" />
-            </span>
-          </div>
-          <div className="mt-4">
-            <div className="flex items-baseline justify-between mb-1">
-              <h3 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">
-                {completedSkillsCount}<span className="text-sm font-normal text-slate-400">/{totalSkills}</span>
-              </h3>
-              <span className="text-sm font-bold text-emerald-500">{skillsPercentage}%</span>
-            </div>
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Skills Checked</p>
-            {/* Progress bar */}
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full mt-3 overflow-hidden">
-              <div 
-                className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-                style={{ width: `${skillsPercentage}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Main Content Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Area: 2 Columns spanning on desktop, hosting Jobs and Resources side-by-side */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 h-fit">
-          
-          {/* Saved / Recommended Jobs Card */}
-          <div className="glass-card rounded-2xl p-6 flex flex-col justify-between min-h-[380px]">
-            <div>
-              <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Bookmark className="h-4.5 w-4.5 text-indigo-500" />
-                  {hasSavedJobs ? `Saved Jobs (${savedJobsCount})` : 'Recommended Jobs'}
-                </span>
-                {!hasSavedJobs && (
-                  <span className="text-[9px] bg-violet-500/10 text-violet-605 dark:text-violet-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                    Suggested
-                  </span>
-                )}
-              </h3>
-              
-              <div className="space-y-3">
-                {bookmarkedJobsList.map((job) => (
-                  <div 
-                    key={job.id} 
-                    onClick={() => navigate('/jobs')}
-                    className="flex justify-between items-center p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-white/40 dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:border-violet-500/25 transition-all duration-200 cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className={`h-9 w-9 rounded-lg bg-gradient-to-tr ${job.logoColor} text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm`}>
-                        {job.company.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-slate-850 dark:text-slate-100 text-xs group-hover:text-violet-650 dark:group-hover:text-violet-400 transition-colors truncate">
-                          {job.title}
-                        </h4>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-505 truncate">{job.company} &bull; {job.location}</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800/40 mt-4">
-              <button 
-                onClick={() => navigate('/jobs')}
-                className="w-full py-2.5 rounded-xl border border-dashed border-violet-550/20 hover:border-violet-500 text-xs font-bold text-violet-600 dark:text-violet-400 text-center hover:bg-violet-500/5 transition-all cursor-pointer"
-              >
-                {hasSavedJobs ? 'Manage Saved Jobs' : 'Browse All Jobs'}
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Learning Card */}
-          <div className="glass-card rounded-2xl p-6 flex flex-col justify-between min-h-[380px] bg-gradient-to-b from-white/40 to-violet-500/[0.02] dark:from-slate-900/30 dark:to-violet-950/[0.02]">
-            <div>
-              <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <BookOpen className="h-4.5 w-4.5 text-violet-500" />
-                Continue Learning
-              </h3>
-              <div className="space-y-3">
-                {resourcesData.slice(0, 3).map((res) => {
-                  const isCompleted = completedResources.includes(res.id);
-                  return (
-                    <a
-                      key={res.id}
-                      href={res.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex justify-between items-center p-3 rounded-xl bg-white/50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors group"
-                    >
-                      <div className="space-y-0.5 min-w-0 max-w-[75%]">
-                        <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate group-hover:text-violet-650 dark:group-hover:text-violet-405 transition-colors">
-                          {res.title}
-                        </h4>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-505 truncate">{res.platform} &bull; {res.topic}</p>
-                      </div>
-                      {isCompleted ? (
-                        <span className="text-[9px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-bold">Done</span>
-                      ) : (
-                        <span className="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full font-medium">Study</span>
-                      )}
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800/40 mt-4">
-              <button
-                onClick={() => navigate('/resources')}
-                className="w-full py-2.5 rounded-xl border border-dashed border-violet-550/20 hover:border-violet-500 text-xs font-bold text-violet-605 dark:text-violet-450 text-center hover:bg-violet-500/5 transition-all cursor-pointer"
-              >
-                Open Library
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Sidebar: Stacked Recommended Skill & Tip of Day */}
-        <div className="space-y-6 flex flex-col justify-between h-full min-h-[380px]">
-          
-          {/* Recommended Next Skill Card */}
-          {recommendedSkill ? (
-            <div className="glass-card rounded-2xl p-6 relative overflow-hidden flex-grow flex items-center">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-violet-500/10 rounded-full blur-xl -mr-6 -mt-6"></div>
-              <div className="flex items-start gap-3.5 relative z-10 w-full">
-                <div className="p-3 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-xl shrink-0">
-                  <Award className="h-5.5 w-5.5" />
-                </div>
-                <div className="space-y-1 flex-1 min-w-0">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-violet-500">Recommended Next Skill</span>
-                  <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 truncate leading-snug">{recommendedSkill.name}</h4>
-                  <p className="text-[10px] text-slate-400">Roadmap: <span className="font-semibold text-slate-600 dark:text-slate-300">{recommendedSkill.category}</span></p>
-                  <div className="pt-2">
-                    <button
-                      onClick={() => navigate('/progress')}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-violet-600 dark:text-violet-400 hover:text-violet-750 hover:underline cursor-pointer"
-                    >
-                      Go to Checklist <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="glass-card rounded-2xl p-6 flex-grow flex items-center justify-center bg-emerald-500/5 border border-emerald-500/10">
-              <div className="text-center space-y-1 text-emerald-600 dark:text-emerald-450">
-                <Award className="h-8 w-8 mx-auto animate-bounce" />
-                <h4 className="text-xs font-bold">Roadmap Completed!</h4>
-                <p className="text-[10px] opacity-80">All skills checked off</p>
-              </div>
-            </div>
-          )}
-
-          {/* Inspirational Quote Card */}
-          <div className="glass-card rounded-2xl p-6 bg-gradient-to-tr from-indigo-500/[0.03] to-purple-500/[0.03] flex-grow flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-2">
-              <Compass className="h-5 w-5 text-indigo-500 shrink-0" />
-              <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">Developer Tip of the Day</h4>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 italic leading-relaxed">
-              "The best portfolios aren't built in a day. They are created by consistently pushing small commits, learning syntax deeply, and solving real user problems."
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              {getGreeting()}, {firstName}! 👋
+            </h1>
+            <p className="text-white/80 text-xs sm:text-sm font-medium max-w-xl leading-relaxed">
+              {activeMapping.tagline}
             </p>
+            <div className="pt-2 flex gap-3">
+              <button 
+                onClick={onResetProfile}
+                className="text-[10px] font-bold bg-white/15 hover:bg-white/25 text-white px-3.5 py-1.5 rounded-xl border border-white/15 transition-all cursor-pointer"
+              >
+                Change Learning Goal
+              </button>
+            </div>
           </div>
 
+          {/* Overall Progress Ring Widget */}
+          <div className="flex flex-col items-center gap-2 bg-white/10 backdrop-blur-md rounded-3xl px-6 py-5 border border-white/20 shrink-0 shadow-lg">
+            <div className="relative h-20 w-20 flex items-center justify-center">
+              <svg className="h-20 w-20 -rotate-90" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="6.5" />
+                <circle
+                  cx="32" cy="32" r="26" fill="none"
+                  stroke="white" strokeWidth="6.5"
+                  strokeDasharray={`${2 * Math.PI * 26}`}
+                  strokeDashoffset={`${2 * Math.PI * 26 * (1 - progressPct / 100)}`}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-white font-black text-base">
+                {progressPct}%
+              </span>
+            </div>
+            <div className="text-center">
+              <p className="text-white text-[10px] font-black uppercase tracking-wider">
+                Overall Progress
+              </p>
+              <p className="text-white/60 text-[9px] font-semibold mt-0.5">
+                {completedGlobalSkills} / {totalGlobalSkills} skills
+              </p>
+            </div>
+          </div>
         </div>
-
       </div>
 
+      {/* ── Stats Row (Role Personalized) ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: 'Roadmap Phases', value: roadmapPhasesCount, icon: Map, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-500/10' },
+          { label: 'Projects Available', value: projectsAvailableCount, icon: Lightbulb, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10' },
+          { label: 'Resources Done', value: `${resourcesCompletedCount}/${roleResources.length}`, icon: GraduationCap, color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-500/10' },
+          { label: 'Skills Completed', value: `${catSkillsCompletedCount}/${catSkillsCount}`, icon: CheckSquare, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10' },
+        ].map(s => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="glass-card rounded-2xl p-4 flex items-center gap-3 border border-slate-200/50 dark:border-slate-800/40">
+              <div className={`h-11 w-11 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
+                <Icon className={`h-5 w-5 ${s.color}`} />
+              </div>
+              <div>
+                <p className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">{s.label}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Quick Navigation Cards (PRD requirement) ── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Compass className="h-5 w-5 text-violet-500" />
+          <h2 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm uppercase tracking-wider">
+            Quick Navigation Hub
+          </h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            {
+              title: `${profile?.role} Roadmap`,
+              desc: `Access your step-by-step career milestones. Currently structured into ${roadmapPhasesCount} full phases of concepts and tasks.`,
+              icon: Map,
+              color: 'from-violet-500 to-indigo-650',
+              route: '/roadmaps',
+              badge: 'Visual Path'
+            },
+            {
+              title: `${activeMapping.projectCategories.join(' & ')} Projects`,
+              desc: `Apply your knowledge to build real, deployable portfolio pieces. ${projectsAvailableCount} domain-specific ideas waiting.`,
+              icon: Lightbulb,
+              color: 'from-amber-500 to-orange-600',
+              route: '/projects',
+              badge: 'Hands-on Projects'
+            },
+            {
+              title: `Curated Learning Resources`,
+              desc: `Access free, hand-picked documentation, courses, and playlists matching topics: ${activeMapping.resourceTopics.join(', ')}.`,
+              icon: GraduationCap,
+              color: 'from-sky-500 to-blue-650',
+              route: '/resources',
+              badge: 'Free Guides'
+            },
+            {
+              title: `Update Progress Checklist`,
+              desc: `Check off development competencies. Your primary skill focus is ${matchedSkillCat.title} (${catSkillsCompletedCount}/${catSkillsCount} done).`,
+              icon: CheckSquare,
+              color: 'from-emerald-500 to-teal-605',
+              route: '/progress',
+              badge: 'Interactive Tracker'
+            }
+          ].map(card => {
+            const Icon = card.icon;
+            return (
+              <button
+                key={card.title}
+                onClick={() => navigate(card.route)}
+                className="glass-card rounded-3xl p-5 text-left border border-slate-200/50 dark:border-slate-800/40 hover:border-violet-500/20 hover:shadow-lg transition-all duration-300 flex items-start justify-between gap-4 group cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-extrabold uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-0.5 rounded-full">
+                      {card.badge}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                      {card.desc}
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-violet-600 dark:text-violet-400 hover:underline">
+                    Explore Now <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </div>
+                
+                <div className={`h-11 w-11 rounded-2xl bg-gradient-to-tr ${card.color} text-white flex items-center justify-center shadow-md shrink-0`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Tip of the Day Panel ── */}
+      <div className="relative overflow-hidden glass-card rounded-3xl p-6 border border-amber-200/40 dark:border-amber-800/20 bg-gradient-to-tr from-amber-500/[0.01] to-orange-500/[0.01]">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl" />
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1.5 rounded-lg bg-amber-500/10">
+            <Flame className="h-4 w-4 text-amber-500" />
+          </div>
+          <h2 className="font-extrabold text-slate-800 dark:text-slate-100 text-xs uppercase tracking-wider">Dev Tip of the Day</h2>
+        </div>
+        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic max-w-4xl">
+          "{tip}"
+        </p>
+      </div>
     </div>
   );
 }
-

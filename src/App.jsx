@@ -2,23 +2,21 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import WelcomeScreen from './components/WelcomeScreen';
 import Dashboard from './pages/Dashboard';
-import Jobs from './pages/Jobs';
+import Roadmaps from './pages/Roadmaps';
+import Projects from './pages/Projects';
 import Resources from './pages/Resources';
 import Progress from './pages/Progress';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { defaultSkills } from './data/mockData';
 
 export default function App() {
-  // Sync state with local storage
-  const [theme, setTheme] = useLocalStorage('devsearch-theme', 'dark');
-  const [savedJobs, setSavedJobs] = useLocalStorage('devsearch-saved-jobs', []);
-  const [completedResources, setCompletedResources] = useLocalStorage('devsearch-completed-resources', []);
-  const [skills, setSkills] = useLocalStorage('devsearch-skills-progress', {});
-  const [profile, setProfile] = useLocalStorage('devsearch-profile-info', {
-    name: 'Ahammed Adil C T',
-    role: 'BCA Student & Aspiring Frontend Engineer'
-  });
+  // Sync state with local storage using PRD keys
+  const [theme, setTheme] = useLocalStorage('ds-theme', 'dark');
+  const [completedResources, setCompletedResources] = useLocalStorage('ds-completed-resources', []);
+  const [skills, setSkills] = useLocalStorage('ds-skills', {});
+  const [profile, setProfile] = useLocalStorage('ds-user-profile', null);
 
   // Apply dark mode theme to HTML root
   useEffect(() => {
@@ -33,14 +31,6 @@ export default function App() {
   // Toggle handlers
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
-  const toggleSaveJob = (jobId) => {
-    setSavedJobs((prevJobs) =>
-      prevJobs.includes(jobId)
-        ? prevJobs.filter((id) => id !== jobId)
-        : [...prevJobs, jobId]
-    );
   };
 
   const toggleCompleteResource = (resourceId) => {
@@ -74,12 +64,23 @@ export default function App() {
     setSkills(updated);
   };
 
+  const handleResetProfile = () => {
+    if (window.confirm('Are you sure you want to change your goal? This will let you re-select your role.')) {
+      setProfile(null);
+    }
+  };
+
+  // If profile is not set, show the onboarding screen
+  if (!profile) {
+    return <WelcomeScreen onComplete={(newProfile) => setProfile(newProfile)} />;
+  }
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
         
         {/* Navbar */}
-        <Navbar theme={theme} toggleTheme={toggleTheme} />
+        <Navbar theme={theme} toggleTheme={toggleTheme} onResetProfile={handleResetProfile} profile={profile} />
 
         {/* Page Container */}
         <main className="flex-grow">
@@ -88,20 +89,26 @@ export default function App() {
               path="/" 
               element={
                 <Dashboard 
-                  savedJobs={savedJobs} 
                   completedResources={completedResources}
                   skills={skills}
                   profile={profile}
-                  setProfile={setProfile}
+                  onResetProfile={handleResetProfile}
                 />
               } 
             />
             <Route 
-              path="/jobs" 
+              path="/roadmaps" 
               element={
-                <Jobs 
-                  savedJobs={savedJobs} 
-                  toggleSaveJob={toggleSaveJob} 
+                <Roadmaps 
+                  profile={profile} 
+                />
+              } 
+            />
+            <Route 
+              path="/projects" 
+              element={
+                <Projects 
+                  profile={profile} 
                 />
               } 
             />
@@ -109,6 +116,7 @@ export default function App() {
               path="/resources" 
               element={
                 <Resources 
+                  profile={profile}
                   completedResources={completedResources} 
                   toggleCompleteResource={toggleCompleteResource} 
                 />
@@ -118,6 +126,7 @@ export default function App() {
               path="/progress" 
               element={
                 <Progress 
+                  profile={profile}
                   skills={skills} 
                   toggleSkill={toggleSkill} 
                   resetSkills={resetSkills}
