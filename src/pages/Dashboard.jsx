@@ -277,20 +277,20 @@ export default function Dashboard({ completedResources, skills, profile, onReset
               badge: 'Visual Path'
             },
             {
-              title: `${activeMapping.projectCategories.join(' & ')} Projects`,
-              desc: `Apply your knowledge to build real, deployable portfolio pieces. ${projectsAvailableCount} domain-specific ideas waiting.`,
-              icon: Lightbulb,
-              color: 'from-amber-500 to-orange-600',
-              route: '/projects',
-              badge: 'Hands-on Projects'
-            },
-            {
               title: `Curated Learning Resources`,
               desc: `Access free, hand-picked documentation, courses, and playlists matching topics: ${activeMapping.resourceTopics.join(', ')}.`,
               icon: GraduationCap,
               color: 'from-sky-500 to-blue-650',
               route: '/resources',
               badge: 'Free Guides'
+            },
+            {
+              title: `${activeMapping.projectCategories.join(' & ')} Projects`,
+              desc: `Apply your knowledge to build real, deployable portfolio pieces. ${projectsAvailableCount} domain-specific ideas waiting.`,
+              icon: Lightbulb,
+              color: 'from-amber-500 to-orange-600',
+              route: '/projects',
+              badge: 'Hands-on Projects'
             },
             {
               title: `Update Progress Checklist`,

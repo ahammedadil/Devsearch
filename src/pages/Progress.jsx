@@ -47,15 +47,15 @@ export default function Progress({ profile, skills, toggleSkill, resetSkills, ma
     const { percentage } = getCategoryStats(cat);
     // X goes from 110 to 390
     const x = 110 + index * 130;
-    // Y goes from 130 (0%) to 30 (100%)
-    const y = 130 - (percentage / 100) * 100;
+    // Y goes from 250 (0%) to 50 (100%)
+    const y = 250 - (percentage / 100) * 200;
     return { x, y, title: cat.title, percentage };
   });
 
   // Create path coordinates
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   const areaPath = points.length > 0 
-    ? `${linePath} L ${points[points.length - 1].x} 130 L ${points[0].x} 130 Z` 
+    ? `${linePath} L ${points[points.length - 1].x} 250 L ${points[0].x} 250 Z` 
     : '';
 
   return (
@@ -161,8 +161,8 @@ export default function Progress({ profile, skills, toggleSkill, resetSkills, ma
           </div>
 
           {/* SVG Line / Area Graph */}
-          <div className="w-full relative h-[150px]">
-            <svg className="w-full h-full" viewBox="0 0 450 160">
+          <div className="w-full relative h-[280px]">
+            <svg className="w-full h-full" viewBox="0 0 450 280">
               <defs>
                 <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.4" />
@@ -171,23 +171,23 @@ export default function Progress({ profile, skills, toggleSkill, resetSkills, ma
               </defs>
 
               {/* Y-Axis Horizontal Gridlines */}
-              <line x1="70" y1="30" x2="410" y2="30" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
-              <line x1="70" y1="55" x2="410" y2="55" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
-              <line x1="70" y1="80" x2="410" y2="80" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
-              <line x1="70" y1="105" x2="410" y2="105" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
+              <line x1="70" y1="50" x2="410" y2="50" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
+              <line x1="70" y1="100" x2="410" y2="100" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
+              <line x1="70" y1="150" x2="410" y2="150" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
+              <line x1="70" y1="200" x2="410" y2="200" stroke="currentColor" className="text-slate-200 dark:text-slate-800/60" strokeWidth="1" strokeDasharray="4,4" />
 
               {/* Draw Axis Lines */}
               {/* Y-Axis Line */}
-              <line x1="70" y1="20" x2="70" y2="130" stroke="currentColor" className="text-slate-350 dark:text-slate-700" strokeWidth="1.5" />
+              <line x1="70" y1="40" x2="70" y2="250" stroke="currentColor" className="text-slate-350 dark:text-slate-700" strokeWidth="1.5" />
               {/* X-Axis Line */}
-              <line x1="70" y1="130" x2="420" y2="130" stroke="currentColor" className="text-slate-350 dark:text-slate-700" strokeWidth="1.5" />
+              <line x1="70" y1="250" x2="420" y2="250" stroke="currentColor" className="text-slate-350 dark:text-slate-700" strokeWidth="1.5" />
 
               {/* Y-Axis Tick Labels */}
-              <text x="60" y="34" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">100%</text>
-              <text x="60" y="59" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">75%</text>
-              <text x="60" y="84" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">50%</text>
-              <text x="60" y="109" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">25%</text>
-              <text x="60" y="134" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">0%</text>
+              <text x="60" y="54" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">100%</text>
+              <text x="60" y="104" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">75%</text>
+              <text x="60" y="154" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">50%</text>
+              <text x="60" y="204" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">25%</text>
+              <text x="60" y="254" textAnchor="end" className="text-[9px] font-bold fill-slate-500 dark:fill-slate-400">0%</text>
 
               {/* Area Under Curve */}
               {areaPath && <path d={areaPath} fill="url(#areaGradient)" />}
@@ -226,7 +226,7 @@ export default function Progress({ profile, skills, toggleSkill, resetSkills, ma
                   {/* X-Axis Category Label */}
                   <text 
                     x={p.x} 
-                    y="146" 
+                    y="266" 
                     textAnchor="middle" 
                     className="text-[9px] font-bold fill-slate-605 dark:fill-slate-400"
                   >

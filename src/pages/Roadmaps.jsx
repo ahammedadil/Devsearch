@@ -153,7 +153,7 @@ export default function Roadmaps({ profile }) {
                 </div>
 
                 {/* Left/Right Card container */}
-                <div className={`w-full md:w-[calc(50%-3rem)] ml-14 md:ml-0 ${
+                <div className={`w-[calc(100%-3.5rem)] md:w-[calc(50%-3rem)] ml-14 md:ml-0 ${
                   isLeft ? 'md:mr-auto md:pr-6' : 'md:ml-auto md:pl-6'
                 }`}>
                   

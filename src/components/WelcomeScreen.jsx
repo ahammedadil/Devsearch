@@ -75,7 +75,7 @@ export default function WelcomeScreen({ onComplete }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950 overflow-y-auto px-4 py-8">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center bg-slate-950 overflow-y-auto px-4 py-8">
       {/* Animated visual blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse-slow" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 animate-pulse-slow" />
@@ -117,11 +117,11 @@ export default function WelcomeScreen({ onComplete }) {
             </div>
 
             {/* Feature pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
               {features.map(f => {
                 const Icon = f.icon;
                 return (
-                  <div key={f.label} className="flex flex-col items-center text-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-5 transition-all hover:bg-white/10 hover:-translate-y-1 duration-300">
+                  <div key={f.label} className="flex flex-col items-center text-center gap-2 sm:gap-3 bg-white/5 border border-white/10 rounded-2xl p-3 sm:p-5 transition-all hover:bg-white/10 hover:-translate-y-1 duration-300">
                     <div className={`${f.color} shrink-0 bg-white/5 p-2.5 rounded-xl`}>
                       <Icon className="h-6 w-6" />
                     </div>
@@ -187,7 +187,7 @@ export default function WelcomeScreen({ onComplete }) {
                 <button
                   key={r.label}
                   onClick={() => handleFinish(r.label)}
-                  className="flex items-start gap-4 p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-violet-600/20 hover:border-violet-500/40 text-left transition-all cursor-pointer group hover:scale-[1.02] duration-300"
+                  className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-violet-600/20 hover:border-violet-500/40 text-left transition-all cursor-pointer group hover:scale-[1.02] duration-300"
                 >
                   <span className="text-3xl shrink-0 p-2 bg-white/5 rounded-xl block group-hover:scale-110 transition-transform">{r.emoji}</span>
                   <div className="space-y-1">

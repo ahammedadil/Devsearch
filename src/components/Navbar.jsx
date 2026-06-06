@@ -8,8 +8,8 @@ export default function Navbar({ theme, toggleTheme, profile, onResetProfile }) 
   const navItems = [
     { to: '/', label: 'Dashboard', icon: Home },
     { to: '/roadmaps', label: 'Roadmaps', icon: Map },
-    { to: '/projects', label: 'Projects', icon: Lightbulb },
     { to: '/resources', label: 'Resources', icon: GraduationCap },
+    { to: '/projects', label: 'Projects', icon: Lightbulb },
     { to: '/progress', label: 'Progress', icon: CheckSquare },
   ];
 

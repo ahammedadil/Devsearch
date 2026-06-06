@@ -105,20 +105,20 @@ export default function App() {
               } 
             />
             <Route 
-              path="/projects" 
-              element={
-                <Projects 
-                  profile={profile} 
-                />
-              } 
-            />
-            <Route 
               path="/resources" 
               element={
                 <Resources 
                   profile={profile}
                   completedResources={completedResources} 
                   toggleCompleteResource={toggleCompleteResource} 
+                />
+              } 
+            />
+            <Route 
+              path="/projects" 
+              element={
+                <Projects 
+                  profile={profile} 
                 />
               } 
             />
